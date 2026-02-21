@@ -16,11 +16,8 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-
-environ.Env.read_env()
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
@@ -38,6 +35,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     "rest_framework.authtoken",
+    'drf_spectacular',
 
     'orders',
     'clients'
@@ -128,4 +126,5 @@ REST_FRAMEWORK = {
     "DATETIME_INPUT_FORMATS": [
         "%d-%m-%Y %H:%M",
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
