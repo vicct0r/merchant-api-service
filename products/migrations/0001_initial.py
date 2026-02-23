@@ -10,19 +10,21 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('clients', '0001_initial'),
         ('merchants', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Order',
+            name='Product',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False, unique=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('due_date', models.DateTimeField()),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('on_route', 'On route'), ('delivered', 'Delivered'), ('issue', 'Issue'), ('in_preparation', 'In preparation'), ('returned', 'Returned')], default='pending', max_length=20)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='client_orders', to='clients.client')),
+                ('modified', models.DateTimeField(auto_now=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('name', models.CharField(max_length=200, unique=True)),
+                ('sku', models.CharField(max_length=12, unique=True)),
+                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('quantity', models.PositiveIntegerField(default=0)),
                 ('workplace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='merchants.workplace')),
             ],
             options={
@@ -30,12 +32,15 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Reversal',
+            name='ProductsTransactions',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False, unique=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('observations', models.TextField()),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reversal', to='orders.order')),
+                ('modified', models.DateTimeField(auto_now=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('operation', models.CharField(max_length=100)),
+                ('quantity', models.BigIntegerField()),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='products.product')),
                 ('workplace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='merchants.workplace')),
             ],
             options={

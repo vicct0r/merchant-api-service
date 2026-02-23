@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'clients',
     'merchants',
     'products',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +80,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': env.db()
 }
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
 # Password validation

@@ -13,7 +13,7 @@ class WorkplaceCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('You cannot have more than one workplace.')
 
 
-class InviteJoinWorkplace(serializers.ModelSerializer):
+class InviteJoinWorkplaceSerializer(serializers.ModelSerializer):
     invite = serializers.UUIDField()
 
     class Meta:
