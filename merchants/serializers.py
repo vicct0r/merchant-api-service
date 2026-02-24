@@ -1,28 +1,47 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from . import models
 
+User = get_user_model()
 
-class WorkplaceCreationSerializer(serializers.ModelSerializer):
+class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workplace
         fields = '__all__'
-        read_only_fields = ['id', 'created', 'modified', 'owner']
+        read_only_fields = ['id', 'created', 'modified', 'owner', 'whitelist']
 
-    def validate_owner(self, value):
-        if models.Workplace.objects.filter(owner=value).exists():
-            raise serializers.ValidationError('You cannot have more than one workplace.')
+    def validate_whitelist(self, value):
+        guest = User.objects.filter(email=value).exists()
+        if not guest:
+            raise serializers.ValidationError('User not found.')
+        return value
 
 
-class InviteJoinWorkplaceSerializer(serializers.ModelSerializer):
-    invite = serializers.UUIDField()
+class WorkplaceMinimalSerializer(serializers.ModelSerializer):
+    owner = serializers.SerializerMethodField()
+    class Meta:
+        model = models.Workplace
+        fields = ['name', 'cnpj', 'owner']
+        read_only_fields = ['name', 'cnpj', 'owner']
+    
+    def get_owner(self, obj):
+        return obj.email
+
+class InviteToWorkplaceSerializer(serializers.ModelSerializer):
+    workplace_id = serializers.UUIDField()
+    permission = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Workplace
-        fields = ['id', 'created', 'user', 'workplace', 'role', 'invite']
-        read_only_fields = ['id', 'created', 'user', 'workplace', 'role']
-
-    def validate_invite(self, value):
-        is_workplace = models.Workplace.objects.filter(id=value).exists()
-        if not is_workplace:
-            raise serializers.ValidationError('This workplace does not exist.')
-        return value
+        fields = ['workplace_id', 'permission']
+        read_only_fields = ['permission']    
+    
+    def get_permission(self, obj):
+        whitelist = obj.whitelist.all()
+        request = self.context.get('request')
+        if request:
+            user = request.user
+        if not user in whitelist:
+            obj = False
+        obj = True
+        return obj

@@ -15,9 +15,18 @@ class BaseMerchantDomain(models.Model):
 
 
 class Workplace(BaseMerchantDomain):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ownership', on_delete=models.CASCADE)
+    owner = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        related_name='ownership', 
+        on_delete=models.CASCADE, 
+        unique=True
+    )
     cnpj = models.CharField(max_length=50)
     name = models.CharField(max_length=150)
+    whitelist = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='workplace_whitelist_granted'
+    )
 
     def __str__(self):
         return self.name

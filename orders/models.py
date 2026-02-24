@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 import uuid
 from django.core.exceptions import ValidationError
 from clients.models import Client

@@ -7,14 +7,10 @@ from django.utils import timezone
 from rest_framework import permissions
 from .serializers import OrderSerializer
 from .models import Order
-
-
-class OwnerFilterMixin:
-    def get_queryset(self):
-        return Order.objects.filter(owner=self.request.user)
+from CustomMixins import TenantMixin
     
 
-class OrderListCreateAPIView(OwnerFilterMixin, generics.ListCreateAPIView):
+class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -31,10 +27,10 @@ class OrderListCreateAPIView(OwnerFilterMixin, generics.ListCreateAPIView):
         return qs.exclude(due_date__lt=timezone.now())
 
 
-class AllOrdersListAPIView(OwnerFilterMixin, generics.ListAPIView):
+class AllOrdersListAPIView(TenantMixin, generics.ListAPIView):
     serializer_class = OrderSerializer
 
 
-class OrderRetrieveUpdateDestroy(OwnerFilterMixin, generics.RetrieveUpdateDestroyAPIView):
+class OrderRetrieveUpdateDestroy(TenantMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
 

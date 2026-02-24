@@ -3,26 +3,21 @@ from rest_framework import generics
 
 from .models import Client
 from .serializers import ClientSerializer
+from CustomMixins import TenantMixin
 
 
-class OwnerFilterMixin:
-
-    def get_queryset(self):
-        return Client.objects.filter(owner=self.request.user)
-
-
-class ClientListCreateAPIView(OwnerFilterMixin, generics.ListCreateAPIView):
+class ClientListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
     serializer_class = ClientSerializer
 
 
-class ClientListAPIView(OwnerFilterMixin, generics.ListAPIView):
+class ClientListAPIView(TenantMixin, generics.ListAPIView):
     serializer_class = ClientSerializer
 
     def get_queryset(self):
         return super().get_queryset().exclude(is_active=False)
 
 
-class ClientRetrieveUpdateDestroy(OwnerFilterMixin, generics.RetrieveUpdateDestroyAPIView):
+class ClientRetrieveUpdateDestroy(TenantMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ClientSerializer
     lookup_field = 'id'
 

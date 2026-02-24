@@ -27,7 +27,7 @@ class Product(BaseProductDomain):
 
     def clean_price(self):
         if self.price < 0:
-            raise ValidationError('This is not a valid price.')
+            raise ValidationError('Price cannot be lower than 0.')
 
 
 class ProductsTransactions(BaseProductDomain):
@@ -37,3 +37,4 @@ class ProductsTransactions(BaseProductDomain):
 
     def __str__(self):
         return self.created
+

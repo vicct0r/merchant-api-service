@@ -3,5 +3,5 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.CustomUserCreateAPIView.as_view()),
+    path('signup/', views.CustomUserCreateAPIView.as_view()),
 ]
