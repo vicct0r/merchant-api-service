@@ -10,12 +10,6 @@ class WorkplaceSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created', 'modified', 'owner', 'whitelist']
 
-    def validate_whitelist(self, value):
-        guest = User.objects.filter(email=value).exists()
-        if not guest:
-            raise serializers.ValidationError('User not found.')
-        return value
-
 
 class WorkplaceMinimalSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField()
@@ -25,9 +19,10 @@ class WorkplaceMinimalSerializer(serializers.ModelSerializer):
         read_only_fields = ['name', 'cnpj', 'owner']
     
     def get_owner(self, obj):
-        return obj.email
+        return obj.owner.email
 
-class InviteToWorkplaceSerializer(serializers.ModelSerializer):
+
+class AcceptInviteToWorkplaceSerializer(serializers.ModelSerializer):
     workplace_id = serializers.UUIDField()
     permission = serializers.SerializerMethodField()
 
@@ -45,3 +40,14 @@ class InviteToWorkplaceSerializer(serializers.ModelSerializer):
             obj = False
         obj = True
         return obj
+
+
+class WhitelistAddUserSerializer(serializers.Serializer):
+    user = serializers.EmailField()
+
+    def validate_email(self, value):
+        workplace = self.instance
+        guest = User.objects.filter(email=value)
+        if guest in workplace.whitelist.all():
+            raise serializers.ValidationError('This user is already from this workplace.')
+        return value
