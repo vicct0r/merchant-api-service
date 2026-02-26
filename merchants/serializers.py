@@ -24,22 +24,10 @@ class WorkplaceMinimalSerializer(serializers.ModelSerializer):
 
 class AcceptInviteToWorkplaceSerializer(serializers.ModelSerializer):
     workplace_id = serializers.UUIDField()
-    permission = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Workplace
-        fields = ['workplace_id', 'permission']
-        read_only_fields = ['permission']    
-    
-    def get_permission(self, obj):
-        whitelist = obj.whitelist.all()
-        request = self.context.get('request')
-        if request:
-            user = request.user
-        if not user in whitelist:
-            obj = False
-        obj = True
-        return obj
+        fields = ['workplace_id']
 
 
 class WhitelistAddUserSerializer(serializers.Serializer):

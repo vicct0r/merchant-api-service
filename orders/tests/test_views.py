@@ -1,15 +1,16 @@
 from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from clients.models import Client
 from orders.models import Order
 
+User = get_user_model()
 # os testes estão incompletos, este modulo é uma referência gerada por IA.
 # fazer uma revisão com base no requisito real do projeto (business rules). 
 
 class OrderViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username="user1",
+            email="uvictor@gmail.com",
             password="123"
         )
 
