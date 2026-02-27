@@ -1,16 +1,35 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from . import models
 
 User = get_user_model()
 
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email']
+        read_only_fields = ['email']
+
+
 class WorkplaceSerializer(serializers.ModelSerializer):
+    members = CustomUserSerializer(source='whitelist', many=True, read_only=True)
+
     class Meta:
         model = models.Workplace
-        fields = '__all__'
-        read_only_fields = ['id', 'created', 'modified', 'owner', 'whitelist']
+        fields = ['id', 'created_at', 'modified', 'owner', 'members']
+        read_only_fields = ['id', 'created_at', 'modified', 'owner', 'members']
 
 
+class WorkplaceMemberSerializer(serializers.ModelSerializer):
+    members = CustomUserSerializer(source='whitelist', many=True, read_only=True)
+
+    class Meta:
+        model = models.Workplace
+        fields = ['created_at', 'name', 'cnpj', 'members']
+        read_only_fields = ['created_at', 'name', 'cnpj', 'members']
+        
+        
 class WorkplaceMinimalSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField()
     class Meta:

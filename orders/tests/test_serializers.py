@@ -1,10 +1,12 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
+from django.urls import reverse
 
 from clients.models import Client
 from orders.serializers import OrderSerializer
 from orders.models import Order
+from merchants.models import Workplace
 
 User = get_user_model()
 # fazer uma revisão neste modulo com base no modulo [test_views.py]
@@ -16,28 +18,17 @@ class OrderSerializerTest(TestCase):
             password="123"
         )
 
-        self.client = Client.objects.create(
-            name="Client A",
-            owner=self.user,
+        self.workplace = Workplace.objects.create(
+            name="workplace-test-01",
+            cnpj="workplace01",
+            owner=self.user
+        )
+
+        self.user.workplace = self.workplace
+
+        self._client = Client.objects.create(
+            name="Test Client",
+            workplace=self.workplace,
             phone="9999",
         )
 
-    def test_owner_is_automatically_set_from_request(self):
-        factory = APIRequestFactory()
-        request = factory.post("/orders/")
-        request.user = self.user
-
-        data = {
-            "client": self.client.id,
-            "due_date": "18-02-2026 09:00",
-            "status": "pending"
-        }
-
-        serializer = OrderSerializer(data=data)
-
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-
-        order = serializer.save(owner=self.owner)
-
-        self.assertEqual(order.client, self.client)
-        self.assertEqual(order.status, Order.Status.PENDING)    

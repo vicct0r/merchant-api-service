@@ -19,7 +19,23 @@ class WorkplaceCreateAPIView(TenantMixin, generics.CreateAPIView):
         user = self.request.user
         user.workplace = workplace
         user.save(update_fields=["workplace"])
+        workplace.whitelist.add(user)
+
+
+class WorkplaceGETAPIView(APIView):
+    def get(self, request):
+        user = request.user
+        if not user.workplace:
+            raise exceptions.ValidationError('You dont have an active workplace.')
         
+        workplace = user.workplace
+
+        if user == user.workplace.owner:
+            serializer = serializers.WorkplaceSerializer(workplace)
+        else:
+            serializer = serializers.WorkplaceMemberSerializer(workplace)
+        return Response(serializer.data)
+
 
 class WorkplaceOwnerManagmentAPIView(TenantMixin, 
                                      OwnershipPermissionMixin, 

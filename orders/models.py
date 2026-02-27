@@ -1,6 +1,8 @@
 from django.db import models
 import uuid
 from django.core.exceptions import ValidationError
+
+from products.models import Product
 from clients.models import Client
 from merchants.models import Workplace
 
@@ -26,6 +28,7 @@ class Order(BaseOwnershipModel):
     client = models.ForeignKey(Client, related_name='client_orders', on_delete=models.CASCADE)
     due_date = models.DateTimeField()
     status = models.CharField(choices=Status.choices, max_length=20, default=Status.PENDING)
+    products = models.ManyToManyField(Product, related_name='orders', through='OrderItem')
 
     def __str__(self):
         return f"Order {self.id} - due {self.due_date}"
@@ -39,6 +42,16 @@ class Order(BaseOwnershipModel):
         previous = Order.objects.get(pk=self.pk)
         if previous.status in invalid_status:
             raise ValidationError('Delivered and returned orders cannot be modified.')
+        
+
+class OrderItem(BaseOwnershipModel):
+    order = models.ForeignKey(Order, related_name='ordered_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='ordered_item', on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(decimal_places=2, max_digits=10)
+
+    def __str__(self):
+        return f'x{self.quantity} - {self.product.name}'
 
 
 class Reversal(BaseOwnershipModel):

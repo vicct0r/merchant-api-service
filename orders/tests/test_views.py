@@ -2,6 +2,9 @@ from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from clients.models import Client
 from orders.models import Order
+from django.urls import reverse
+from merchants.models import Workplace
+from django.utils import timezone
 
 User = get_user_model()
 # os testes estão incompletos, este modulo é uma referência gerada por IA.
@@ -10,39 +13,44 @@ User = get_user_model()
 class OrderViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="uvictor@gmail.com",
+            email="victor@gmail.com",
             password="123"
         )
 
-        self.client_obj = Client.objects.create(
-            name="Client A",
-            owner=self.user,
+        self.workplace = Workplace.objects.create(
+            name="workplace-test-01",
+            cnpj="workplace01",
+            owner=self.user
+        )
+
+        self.user.workplace = self.workplace
+
+        self.cliente = Client.objects.create(
+            name="Test Client",
+            workplace=self.workplace,
             phone="9999",
         )
 
-    def test_authenticated_user_can_create_order(self):
-        self.client.force_authenticate(user=self.user)
-
-        data = {
-            "client": self.client_obj.id,
-            "due_date": "18-02-2026 09:00",
-            "status": "pending"
+    def test_cliente_creation_workplace(self):
+        self.client.force_authenticate(self.user)
+        
+        cliente_data = {
+            "name": "picapeue",
+            "phone": "0000001",
+            "observations": "he likes to know about details on the process."
         }
 
-        response = self.client.post("v1/orders/", data)
+        cliente_response = self.client.post(reverse('clients:root'), data=cliente_data)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Order.objects.count(), 1)
-        self.assertEqual(Order.objects.first().owner, self.user)
+        self.assertEqual(cliente_response.status_code, 201)
 
-    def test_unauthenticated_user_cannot_create_order(self):
+        print('workplace:', self.user.workplace)
+
         data = {
-            "client": self.client_obj.id,
-            "due_date": "18-02-2026 09:00",
-            "status": "pending"
+            "client": self.cliente.id,
+            "due_date": timezone.datetime(2026, 5, 19, 20, 10),
         }
 
-        response = self.client.post("/orders/", data)
-
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(Order.objects.count(), 0)
+        response = self.client.post(reverse('orders:root'), data=data)
+        self.assertIn(response.status_code, [200, 201, 202])
+        

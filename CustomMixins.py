@@ -2,10 +2,13 @@ from rest_framework import exceptions
 
 class TenantMixin:
     def get_queryset(self):
-        workplace = self.request.user.workplace
-        if not workplace:
-            return None
-        return super().get_queryset().filter(workplace=workplace)
+        user = self.request.user
+        
+        if not user.workplace:
+            raise exceptions.ValidationError('You dont have a workplace attached to your account.')
+        
+        queryset = super().get_queryset()
+        return queryset.filter(workplace=user.workplace)
 
 
 class OwnershipPermissionMixin:

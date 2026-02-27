@@ -13,9 +13,10 @@ from CustomMixins import TenantMixin
 class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Order.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(workplace=self.request.user.workplace)
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -29,8 +30,8 @@ class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
 
 class AllOrdersListAPIView(TenantMixin, generics.ListAPIView):
     serializer_class = OrderSerializer
-
+    queryset = Order.objects.all()
 
 class OrderRetrieveUpdateDestroy(TenantMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
-
+    queryset = Order.objects.all()

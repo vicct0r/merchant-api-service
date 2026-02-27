@@ -3,16 +3,17 @@ from django.utils import timezone
 
 from .models import Order
 from clients.models import Client
+from clients.serializers import ClientBasicSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    status = serializers.ChoiceField(
-        choices=Order.Status.choices
-    )
+    status = serializers.ChoiceField(choices=Order.Status.choices)
+    client_data = ClientBasicSerializer(source='client', read_only=True)
+
     class Meta:
         model = Order
-        fields = '__all__'
-        read_only_fields = ['id', 'created', 'owner']
+        fields = ['id', 'created', 'status', 'due_date', 'client_data', 'workplace']
+        read_only_fields = ['id', 'created', 'workplace', 'client_data']
 
     def validate_client(self, value):
         if not Client.objects.filter(pk=value.pk).exists():
