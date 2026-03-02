@@ -70,6 +70,6 @@ class OrderViewTest(APITestCase):
         }
 
         order_response = self.client.post(reverse('orders:add_product', kwargs={'order_id': response.json()['id']}), data=p_data)
-        print(order_response.data)
+
         self.assertEqual(order_response.status_code, 200)
-        self.assertTrue(order_response.json()['product'])
+        self.assertTrue(order_response.json()['message'])

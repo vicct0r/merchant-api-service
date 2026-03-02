@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import generics
 from django.utils import timezone
-from rest_framework import permissions, response
+from rest_framework import permissions
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import OrderSerializer, OrderItemSerializer
 from .models import Order, OrderItem
@@ -42,10 +43,20 @@ class OrderItemCreateAPIView(APIView):
         order = get_object_or_404(Order, id=order_id)
         serializer = OrderItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        _product = serializer.validated_data['product']
-        p = get_object_or_404(Product, id=_product.id, workplace=request.user.workplace)
-        serializer.save(order=order, unit_price=p.price)
-        return response.Response(serializer.data)
+        data = serializer.validated_data
+
+        product = get_object_or_404(Product, id=data['product'].id)
+        serializer.save(order=order, unit_price=product.price)
+
+        if product.quantity < data['quantity'] and order.status != Order.Status.SCHEDULED:
+            message = f"Your current batch is not enought for this sale."
+        else:
+            message = f"Product added to order {order.id}"
+
+        return Response({
+            "message": message,
+            "data": serializer.data,
+        })
 
 
 class OrderItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

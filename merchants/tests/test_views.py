@@ -70,7 +70,7 @@ class WorkplaceViewTest(APITestCase):
         }
 
         response = self.client.post(reverse('workplace:add_member'), data)
-        print(response.data)
+        
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.user1.workplace.whitelist.filter(pk=self.guest.pk).exists())
 

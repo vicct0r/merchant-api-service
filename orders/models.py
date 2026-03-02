@@ -24,6 +24,7 @@ class Order(BaseOwnershipModel):
         ISSUE = "issue", "Issue"
         IN_PREPARATION = "in_preparation", "In preparation"
         RETURNED = "returned", "Returned"
+        SCHEDULED = "scheduled", "Scheduled"
     
     client = models.ForeignKey(Client, related_name='client_orders', on_delete=models.CASCADE)
     due_date = models.DateTimeField()
