@@ -38,13 +38,11 @@ class WorkplaceViewTest(APITestCase):
             "cnpj": "wwcgi-ent20100300-0001"
         }
 
-        response = self.client.post(reverse('workplace:root'), data)
+        response = self.client.post(reverse('workplace:root'), dat=data)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(models.Workplace.objects.count(), 1 if not self.workplace else 2)
-        self.assertEqual(models.Workplace.objects.filter(cnpj=data['cnpj']).first().owner, self.user1)
-        self.assertEqual(models.Workplace.objects.filter(cnpj=data['cnpj']).first(), self.user1.workplace)
-
+        self.assertEqual(models.Workplace.objects.filter(id=response.json()['id']).first(), self.user1.workplace)
     def test_unauthenticated_user_cannot_create_workplace(self):
         
         data = {

@@ -4,6 +4,7 @@ from clients.models import Client
 from orders.models import Order
 from django.urls import reverse
 from merchants.models import Workplace
+from products.models import Product
 from django.utils import timezone
 
 User = get_user_model()
@@ -31,6 +32,15 @@ class OrderViewTest(APITestCase):
             phone="9999",
         )
 
+        self.product = Product.objects.create(
+            name="MotherBoard Asus TUF Gaming PLUS III",
+            price=2000.99,
+            quantity=200,
+            sku="AA002-30009",
+            workplace=self.workplace
+        )
+        self.product.workplace = self.workplace
+
     def test_cliente_creation_workplace(self):
         self.client.force_authenticate(self.user)
         
@@ -44,13 +54,22 @@ class OrderViewTest(APITestCase):
 
         self.assertEqual(cliente_response.status_code, 201)
 
-        print('workplace:', self.user.workplace)
-
         data = {
-            "client": self.cliente.id,
-            "due_date": timezone.datetime(2026, 5, 19, 20, 10),
+            "client": cliente_response.json()['id'],
+            "due_date": "20-04-2026 06:00",
+            "status": "pending"
         }
 
         response = self.client.post(reverse('orders:root'), data=data)
+
         self.assertIn(response.status_code, [200, 201, 202])
-        
+
+        p_data = {
+            "product": self.product.id,
+            "quantity": 20000,
+        }
+
+        order_response = self.client.post(reverse('orders:add_product', kwargs={'order_id': response.json()['id']}), data=p_data)
+        print(order_response.data)
+        self.assertEqual(order_response.status_code, 200)
+        self.assertTrue(order_response.json()['product'])

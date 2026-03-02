@@ -44,7 +44,8 @@ class Order(BaseOwnershipModel):
             raise ValidationError('Delivered and returned orders cannot be modified.')
         
 
-class OrderItem(BaseOwnershipModel):
+class OrderItem(models.Model):
+    id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
     order = models.ForeignKey(Order, related_name='ordered_items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='ordered_item', on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()

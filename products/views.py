@@ -9,5 +9,9 @@ from CustomMixins import TenantMixin
 
 class ProductListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
     serializer_class = ProductSerializer
+    queryset = models.Product.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(workplace=self.request.user.workplace)
     
     
