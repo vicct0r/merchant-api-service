@@ -2,18 +2,14 @@ from django.db import models
 import uuid
 from django.core.exceptions import ValidationError
 
-from products.models import Product
-from clients.models import Client
-from merchants.models import Workplace
-
 
 class BaseOwnershipModel(models.Model):
     id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
-    workplace = models.ForeignKey(Workplace, on_delete=models.CASCADE)
+    workplace = models.ForeignKey('merchants.Workplace', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-         abstract=True
+        abstract=True
 
 
 class Order(BaseOwnershipModel):
@@ -26,15 +22,15 @@ class Order(BaseOwnershipModel):
         RETURNED = "returned", "Returned"
         SCHEDULED = "scheduled", "Scheduled"
     
-    client = models.ForeignKey(Client, related_name='client_orders', on_delete=models.CASCADE)
+    client = models.ForeignKey('clients.Client', related_name='client_orders', on_delete=models.CASCADE)
     due_date = models.DateTimeField()
     status = models.CharField(choices=Status.choices, max_length=20, default=Status.PENDING)
-    products = models.ManyToManyField(Product, related_name='orders', through='OrderItem')
+    products = models.ManyToManyField('products.Product', related_name='orders', through='OrderItem')
 
     def __str__(self):
         return f"Order {self.id} - due {self.due_date}"
     
-    def clean_status(self):
+    def clean(self):
         if not self.pk:
             return
         
@@ -47,8 +43,8 @@ class Order(BaseOwnershipModel):
 
 class OrderItem(models.Model):
     id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
-    order = models.ForeignKey(Order, related_name='ordered_items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name='ordered_item', on_delete=models.PROTECT)
+    order = models.ForeignKey('orders.Order', related_name='ordered_items', on_delete=models.CASCADE)
+    product = models.ForeignKey('products.Product', related_name='ordered_item', on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(decimal_places=2, max_digits=10)
 
@@ -61,10 +57,10 @@ class Reversal(BaseOwnershipModel):
     observations = models.TextField()
 
     def __str__(self):
-        return self.order
+        return self.order.id
 
-    def clean_order(self):
-        if not Order.objects.filter(owner=self.owner).exists():
+    def clean(self):
+        if not Order.objects.filter(workplace=self.workplace).exists():
             raise ValidationError('Order not found.')
         
         if not self.order.workplace == self.workplace:

@@ -31,7 +31,7 @@ class Workplace(BaseMerchantDomain):
     def __str__(self):
         return self.name
     
-    def clean_owner(self):
-        if self.objects.filter(owner=self.owner).exists():
+    def clean(self):
+        if Workplace.objects.fitler(owner=self.owner).exclude(pk=self.pk).exists():
             raise ValidationError('You cannot own more than one workplace.')
 

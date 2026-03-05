@@ -41,7 +41,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
 
-    workplace = models.ForeignKey(Workplace, related_name='members', on_delete=models.CASCADE, null=True, blank=True)
+    workplace = models.ForeignKey('merchants.Workplace', related_name='members', on_delete=models.SET_NULL, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

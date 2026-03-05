@@ -22,3 +22,9 @@ class ProductCatalogSerializer(serializers.ModelSerializer):
         model = models.Product
         fields = ['sku', 'name', 'price', 'quantity']
         read_only_fields = ['sku', 'name', 'price', 'quantity']
+
+
+class ProductOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        fields = ['name', 'sku']

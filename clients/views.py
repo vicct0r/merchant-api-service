@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, exceptions
 from .models import Client
 from .serializers import ClientSerializer
-from CustomMixins import TenantMixin
+from merchants.mixins import TenantMixin
 
 
 class ClientListCreateAPIView(TenantMixin, generics.ListCreateAPIView):

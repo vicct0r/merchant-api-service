@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 
 from . import models
 from . import serializers
-from CustomMixins import TenantMixin, OwnershipPermissionMixin
+from merchants.mixins import TenantMixin, OwnershipPermissionMixin
 
 User = get_user_model()
 
@@ -38,8 +38,8 @@ class WorkplaceGETAPIView(APIView):
 
 
 class WorkplaceOwnerManagmentAPIView(TenantMixin, 
-                                     OwnershipPermissionMixin, 
-                                     generics.RetrieveUpdateDestroyAPIView):
+                                    OwnershipPermissionMixin, 
+                                    generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.WorkplaceSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
@@ -83,7 +83,7 @@ class WorkplaceInvitationAPIView(APIView):
 
 class WorkplaceAddUserAPIView(APIView):
     def post(self, request):
-        serializer = serializers.WhitelistAddUserSerializer(data=request.data)
+        serializer = serializers.WhitelistAddUserSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['user']
 

@@ -8,33 +8,44 @@ from products.models import Product
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    status = serializers.ChoiceField(choices=Order.Status.choices)
     client_data = ClientBasicSerializer(source='client', read_only=True)
+    total_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
 
     class Meta:
         model = Order
-        fields = ['id', 'created', 'status', 'due_date', 'client_data', 'workplace', 'client']
-        read_only_fields = ['id', 'created', 'workplace', 'client_data']
+        fields = ['id', 'client', 'status', 'due_date', 'total_price', 'client_data']
 
-    def validate_client(self, value):
-        if not Client.objects.filter(pk=value.pk).exists():
-            raise serializers.ValidationError('Client not found on database.')
-        return value
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        required=True,
+        write_only=True
+    )
+    order = serializers.PrimaryKeyRelatedField(read_only=True)
+    sku = serializers.CharField(source='product.sku', read_only=True)
+    unit_price = serializers.DecimalField(source='product.price', read_only=True, decimal_places=2, max_digits=10)
+
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'order', 'sku', 'quantity', 'unit_price']
+        
+
+class OrderRetrieveSerializer(serializers.ModelSerializer):
+    client = serializers.PrimaryKeyRelatedField(
+        queryset=Client.objects.all(),
+        write_only=True
+    )
+    ordered_items = OrderItemSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'client', 'status', 'due_date', 'ordered_items']
+        read_only_fields = ['id']
 
     def validate_due_date(self, value):
         if value < timezone.now():
             raise serializers.ValidationError('Date/Time not valid for due date.')
         return value
 
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(),
-        required=True
-    )
-
-    class Meta:
-        model = OrderItem
-        fields = ['product', 'quantity']
-        read_only_fields = ['unit_price', 'order']
 

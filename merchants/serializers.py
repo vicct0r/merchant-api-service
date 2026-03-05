@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from . import models
 
 User = get_user_model()
@@ -41,20 +40,17 @@ class WorkplaceMinimalSerializer(serializers.ModelSerializer):
         return obj.owner.email
 
 
-class AcceptInviteToWorkplaceSerializer(serializers.ModelSerializer):
+class AcceptInviteToWorkplaceSerializer(serializers.Serializer):
     workplace_id = serializers.UUIDField()
-
-    class Meta:
-        model = models.Workplace
-        fields = ['workplace_id']
 
 
 class WhitelistAddUserSerializer(serializers.Serializer):
     user = serializers.EmailField()
 
-    def validate_email(self, value):
-        workplace = self.instance
-        guest = User.objects.filter(email=value)
+    def validate_user(self, value):
+        workplace = self.context['request'].user.workplace
+        guest = User.objects.filter(email=value).first()
+        
         if guest in workplace.whitelist.all():
             raise serializers.ValidationError('This user is already from this workplace.')
         return value

@@ -17,14 +17,14 @@ class OwnershipPermissionMixin:
 
     def perform_destroy(self, instance):
         if not self.request.user.workplace:
-            raise exceptions.ValidationError(self.workplace_not_found_msg)
+            raise exceptions.PermissionDenied(self.workplace_not_found_msg)
         if self.request.user != self.request.user.workplace.owner:
-            raise exceptions.ValidationError(self.not_workplace_owner_msg)
+            raise exceptions.PermissionDenied(self.not_workplace_owner_msg)
         return super().perform_destroy(instance)
 
     def perform_update(self, instance):
         if not self.request.user.workplace:
-            raise exceptions.ValidationError(self.workplace_not_found_msg)
+            raise exceptions.PermissionDenied(self.workplace_not_found_msg)
         if self.request.user != self.request.user.workplace.owner:
-            raise exceptions.ValidationError(self.not_workplace_owner_msg)
+            raise exceptions.PermissionDenied(self.not_workplace_owner_msg)
         return super().perform_update(instance)
