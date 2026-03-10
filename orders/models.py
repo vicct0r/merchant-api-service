@@ -2,6 +2,8 @@ from django.db import models
 import uuid
 from django.core.exceptions import ValidationError
 
+from auditlog.registry import auditlog
+
 
 class BaseOwnershipModel(models.Model):
     id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
@@ -69,5 +71,6 @@ class Reversal(BaseOwnershipModel):
         
         if not self.order.workplace == self.workplace:
             raise ValidationError('You dont have ownership to this order.')
-    
 
+
+auditlog.register(Order)

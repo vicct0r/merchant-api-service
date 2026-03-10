@@ -2,6 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import uuid
 
+from auditlog.registry import auditlog
+
 
 class BaseProductDomain(models.Model):
     id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
@@ -29,3 +31,5 @@ class Product(BaseProductDomain):
 
     class Meta:
         unique_together=[('workplace', 'sku')]
+
+auditlog.register(Product)

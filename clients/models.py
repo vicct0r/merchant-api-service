@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from auditlog.registry import auditlog
 
 
 class Client(models.Model):
@@ -12,3 +13,5 @@ class Client(models.Model):
     
     def __str__(self):
         return self.name
+
+auditlog.register(Client)

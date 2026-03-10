@@ -10,6 +10,8 @@ from .serializers import OrderSerializer, OrderItemSerializer, OrderRetrieveSeri
 from .models import Order, OrderItem
 from merchants.mixins import TenantMixin
 from drf_spectacular.utils import extend_schema
+from auditlog.models import LogEntry
+from config.serializers import AuditLogSerializer
     
 
 class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
@@ -80,3 +82,12 @@ class OrderItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         return super().perform_update(serializer)
+
+
+class OrderLogsListAPIView(generics.ListAPIView):
+    serializer_class = AuditLogSerializer
+
+    def get_queryset(self):
+        qs = Order.objects.filter(workplace=self.request.user.workplace)
+        return LogEntry.objects.get_for_objects(qs)
+

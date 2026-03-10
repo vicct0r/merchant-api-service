@@ -36,13 +36,13 @@ INSTALLED_APPS = [
     'rest_framework',
     "rest_framework.authtoken",
     'drf_spectacular',
+    'auditlog',
 
     'orders',
     'clients',
     'merchants',
     'products',
     'accounts',
-    'audit',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

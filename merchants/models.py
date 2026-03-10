@@ -4,7 +4,6 @@ import uuid
 
 from django.conf import settings
 
-
 class BaseMerchantDomain(models.Model):
     id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,4 +33,3 @@ class Workplace(BaseMerchantDomain):
     def clean(self):
         if Workplace.objects.filter(owner=self.owner).exclude(pk=self.pk).exists():
             raise ValidationError('You cannot own more than one workplace.')
-
