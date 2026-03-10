@@ -24,4 +24,4 @@ class ClientListAPIView(TenantMixin, generics.ListAPIView):
 class ClientRetrieveUpdateDestroy(TenantMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ClientSerializer
     lookup_field = 'id'
-    queryset = Client.objects.all()
+    queryset = Client.objects.prefetch_related('clients').all()

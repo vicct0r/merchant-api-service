@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from .. import models
+from merchants.models import Workplace
 
 User = get_user_model()
 # os testes estão incompletos, este modulo é uma referência gerada por IA.
@@ -14,7 +15,7 @@ class WorkplaceViewTest(APITestCase):
             password="123"
         )
 
-        self.workplace = models.Workplace.objects.create(
+        self.workplace = Workplace.objects.create(
             name="cGI-Enterprise-LTDA",
             cnpj="AA010-2330",
             owner=self.user

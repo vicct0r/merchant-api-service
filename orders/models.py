@@ -50,6 +50,10 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'x{self.quantity} - {self.product.name}'
+    
+    def clean(self):
+        if self.quantity <= 0:
+            raise ValidationError('Cannot order 0 or less unities of products.')
 
 
 class Reversal(BaseOwnershipModel):

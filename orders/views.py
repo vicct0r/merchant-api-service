@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import F, Sum
 
-from .serializers import OrderSerializer, OrderItemSerializer
+from .serializers import OrderSerializer, OrderItemSerializer, OrderRetrieveSerializer
 from .models import Order, OrderItem
 from merchants.mixins import TenantMixin
-from products.models import Product
+from drf_spectacular.utils import extend_schema
     
 
 class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
@@ -29,7 +29,7 @@ class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
         if status in ['pending', 'delivered', 'on_route', 'in_preparation', 'returned', 'scheduled']:
             qs = qs.filter(status=status)
         
-        return qs.exclude(due_date__lt=timezone.now())
+        return qs.select_related('client').exclude(due_date__lt=timezone.now())
 
     def perform_create(self, serializer):
         workplace = self.request.user.workplace
@@ -38,16 +38,21 @@ class OrderListCreateAPIView(TenantMixin, generics.ListCreateAPIView):
 
 class AllOrdersListAPIView(TenantMixin, generics.ListAPIView):
     serializer_class = OrderSerializer
-    queryset = Order.objects.all()
+    queryset = Order.objects.select_related('client').all()
 
 
 class OrderRetrieveUpdateDestroy(TenantMixin, generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = OrderSerializer
-    queryset = Order.objects.all()
+    serializer_class = OrderRetrieveSerializer
+    queryset = Order.objects.select_related('client').prefetch_related('ordered_items__product').all()
     lookup_field = 'id'
 
 
 class OrderItemCreateAPIView(APIView):
+    @extend_schema(
+        request=OrderItemSerializer,
+        responses={201: OrderItemSerializer}
+    )
+
     def post(self, request, order_id):
         order = get_object_or_404(Order, id=order_id)
         serializer = OrderItemSerializer(data=request.data)
@@ -71,7 +76,7 @@ class OrderItemCreateAPIView(APIView):
 
 class OrderItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OrderItemSerializer
-    queryset = OrderItem.objects.all()
+    queryset = OrderItem.objects.select_related('product').all()
 
     def perform_update(self, serializer):
         return super().perform_update(serializer)

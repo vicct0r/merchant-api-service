@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import permissions, exceptions
 from django.contrib.auth import get_user_model
 
+from drf_spectacular.utils import extend_schema
+
 from . import models
 from . import serializers
 from merchants.mixins import TenantMixin, OwnershipPermissionMixin
@@ -23,6 +25,11 @@ class WorkplaceCreateAPIView(TenantMixin, generics.CreateAPIView):
 
 
 class WorkplaceGETAPIView(APIView):
+    @extend_schema(
+        request=serializers.WorkplaceSerializer,
+        responses={200: serializers.WorkplaceSerializer}
+    )
+
     def get(self, request):
         user = request.user
         if not user.workplace:
@@ -65,6 +72,11 @@ class WorkplaceInvitationAPIView(APIView):
     - Parameters: workplace_id
     - Description: User is able to join to the workplace if he is on the whitelist.
     """
+    @extend_schema(
+        request=serializers.AcceptInviteToWorkplaceSerializer,
+        responses={200: serializers.AcceptInviteToWorkplaceSerializer}
+    )
+
     def post(self, request):
         serializer = serializers.AcceptInviteToWorkplaceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -82,6 +94,11 @@ class WorkplaceInvitationAPIView(APIView):
 
 
 class WorkplaceAddUserAPIView(APIView):
+    @extend_schema(
+        request=serializers.WhitelistAddUserSerializer,
+        responses={200: serializers.WhitelistAddUserSerializer}
+    )
+
     def post(self, request):
         serializer = serializers.WhitelistAddUserSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
